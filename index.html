@@ -1,1 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>托福打卡训练营</title>
+  <meta name="theme-color" content="#58cc02">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="托福打卡">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦉</text></svg>">
+  <style>
+    :root {
+      --duo-green: #58cc02;
+      --duo-green-dark: #46a302;
+      --duo-blue: #1cb0f6;
+      --duo-yellow: #ffc800;
+      --duo-gray: #e5e5e5;
+      --duo-dark: #3c3c3c;
+      --duo-bg: #f7f7f7;
+      --card-bg: #ffffff;
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--duo-bg); color: var(--duo-dark); min-height: 100vh; padding-bottom: 50px; }
+    header {
+      background: var(--card-bg);
+      border-bottom: 2px solid var(--duo-gray);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 800; color: var(--duo-green); }
+    .stat-chip {
+      font-weight: 800;
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: #ff9600;
+      border: 2px solid #ffd8a8;
+      background: #fff9db;
+    }
+    .container { max-width: 800px; margin: 18px auto; padding: 0 16px; }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 2px solid var(--duo-gray);
+      border-bottom: 4px solid var(--duo-gray);
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .selector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media(max-width: 600px) { .selector-grid { grid-template-columns: 1fr; } }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; color: #777; margin-bottom: 6px; }
+    select, input[type="time"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 12px;
+      border: 2px solid var(--duo-gray);
+      background: #fdfdfd;
+      color: var(--duo-dark);
+      outline: none;
+    }
+    .pill-switch {
+      display: flex;
+      background: var(--duo-bg);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+    .pill-btn {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 8px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      color: #777;
+    }
+    .pill-btn.active {
+      background: #fff;
+      color: var(--duo-green);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    .week-slider {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 18px;
+    }
+    .week-slider::-webkit-scrollbar { display: none; }
+    .day-btn {
+      flex: 1;
+      min-width: 62px;
+      padding: 10px 4px;
+      text-align: center;
+      background: #fff;
+      border: 2px solid var(--duo-gray);
+      border-bottom: 4px solid var(--duo-gray);
+      border-radius: 14px;
+      cursor: pointer;
+    }
+    .day-btn.active {
+      border-color: var(--duo-green);
+      background: #eafaf1;
+      color: var(--duo-green-dark);
+    }
+    .day-btn.is-today::after {
+      content: '今日';
+      display: block;
+      font-size: 10px;
+      background: var(--duo-yellow);
+      color: #000;
+      border-radius: 6px;
+      margin-top: 3px;
+      font-weight: 800;
+    }
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed var(--duo-gray);
+    }
+    .duration-tag {
+      background: #e1f5fe;
+      color: #0288d1;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #fcfcfc;
+      border: 2px solid #eee;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .task-item.checked {
+      background: #edfbe2;
+      border-color: var(--duo-green);
+    }
+    .task-item.checked .task-text { text-decoration: line-through; color: #888; }
+    .checkbox-box {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #bbb;
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 14px;
+      color: transparent;
+      margin-top: 2px;
+    }
+    .task-item.checked .checkbox-box {
+      background: var(--duo-green);
+      border-color: var(--duo-green);
+      color: #fff;
+    }
+    .task-text { font-size: 15px; line-height: 1.5; font-weight: 600; flex: 1; }
+    .notice-box {
+      background: #fff8e6;
+      border: 2px solid #ffe08a;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #8a6200;
+      margin-top: 14px;
+    }
+    .btn-duo {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-green {
+      background: var(--duo-green);
+      color: white;
+      border-bottom: 4px solid var(--duo-green-dark);
+    }
+    .btn-green:active { transform: translateY(2px); border-bottom-width: 2px; }
+    .btn-outline {
+      background: white;
+      color: var(--duo-blue);
+      border: 2px solid var(--duo-gray);
+      border-bottom: 4px solid var(--duo-gray);
+    }
+    .review-section {
+      background: #f0f7ff;
+      border: 2px solid #bee3f8;
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-top: 14px;
+    }
+    .review-section h3 { font-size: 15px; font-weight: 800; color: #2b6cb0; margin-bottom: 10px; }
+    .review-q { margin-bottom: 10px; }
+    .review-q label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #4a5568; }
+    .review-q textarea {
+      width: 100%;
+      height: 52px;
+      border: 2px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .notif-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #eef2ff;
+      border: 2px solid #c7d2fe;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
 
+  <canvas id="confetti-canvas"></canvas>
+
+  <header>
+    <div class="brand"><span>🦉</span><span>TOEFL DUO</span></div>
+    <div class="stat-chip">🔥 <span id="streak-count">0</span> 天连胜</div>
+  </header>
+
+  <div class="container">
+    <!-- 通知栏 -->
+    <div class="notif-bar">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:#3730a3;">🔔 每日打卡消息提醒</div>
+        <div style="font-size:11px;color:#6366f1;">电脑桌面弹窗 & 手机消息</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="time" id="reminder-time" value="21:00" style="width:95px;padding:6px;font-size:13px;">
+        <button class="btn-duo btn-outline" style="width:auto;padding:6px 12px;font-size:13px;" onclick="requestNotification()">开启/测试</button>
+      </div>
+    </div>
+
+    <!-- 阶段和单双周 -->
+    <div class="card">
+      <div class="selector-grid">
+        <div class="form-group">
+          <label>当前备考阶段</label>
+          <select id="stage-select" onchange="switchStage()">
+            <option value="freshman">🌱 大一：筑基精听周循环 (5-6h/周)</option>
+            <option value="sophomore1">🚀 大二上：技巧植入期 (8-10h/周)</option>
+            <option value="sophomore2">🚀 大二下：首考准备期 (10-12h/周)</option>
+            <option value="junior_weak">⚡ 大三：弱项攻坚冲刺 (14-16h/周)</option>
+            <option value="junior_exam">⚡ 大三：考前4周模考冲刺 (双模考版)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>单周 / 双周循环模式</label>
+          <div class="pill-switch">
+            <button class="pill-btn active" id="pill-odd" onclick="setWeekType('odd')">单周</button>
+            <button class="pill-btn" id="pill-even" onclick="setWeekType('even')">双周</button>
+          </div>
+        </div>
+      </div>
+
+      <label style="font-size: 13px; font-weight: 700; color: #777; margin-bottom: 8px; display:block;">选择周内日期</label>
+      <div class="week-slider" id="week-slider"></div>
+    </div>
+
+    <!-- 任务卡片 -->
+    <div class="card">
+      <div class="task-header">
+        <h2 id="task-day-title" style="font-size:17px;font-weight:800;">周一 任务</h2>
+        <span class="duration-tag" id="task-duration">40—50分钟</span>
+      </div>
+
+      <div id="tasks-list"></div>
+
+      <div class="notice-box" id="stage-notes"></div>
+
+      <!-- 周日复盘 -->
+      <div class="review-section" id="sunday-review-box" style="display:none;">
+        <h3>📋 周日 20 分钟固定复盘四问</h3>
+        <div class="review-q">
+          <label>1. 完成率：本周计划完成多少？（低于70%→砍非核心保词汇精听）</label>
+          <textarea id="rev-q1" placeholder="记录本周完成率与削减思考..."></textarea>
+        </div>
+        <div class="review-q">
+          <label>2. 高频错因：本周最多错因标签是什么？</label>
+          <textarea id="rev-q2" placeholder="记录高频错因，下周多倾斜10-15分钟..."></textarea>
+        </div>
+        <div class="review-q">
+          <label>3. 改进点：下周只写1条核心改进点</label>
+          <textarea id="rev-q3" placeholder="例如：听力笔记只记名词和逻辑词..."></textarea>
+        </div>
+        <div class="review-q">
+          <label>4. 周末检验过没过？（没过→原地重复；过了→可加量）</label>
+          <textarea id="rev-q4" placeholder="记录检验结果及下周安排..."></textarea>
+        </div>
+        <button class="btn-duo btn-outline" style="padding: 8px;font-size:13px;" onclick="saveReviewNotes()">💾 保存周复盘记录</button>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <button class="btn-duo btn-green" id="finish-all-btn" onclick="toggleAllToday()">
+          ✨ 一键完成今日全部任务
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCHEDULE_DATA = {
+      freshman: {
+        name: "🌱 大一标准周循环",
+        rule: "<strong>周末检验：</strong>任选一篇 Conversation 能脱稿跟读基本跟上原速。不通过→下周减少新篇，同篇再精一次。<br><strong>大一不做：</strong>不刷 TPO 套题、不写独立写作、不掐表阅读。",
+        days: {
+          1: { duration: "40—50分钟", items: ["词汇：新词30—50个+复习旧词，跟读音频", "精听 Conversation A：盲听→逐句听写→对照原文→跟读", "跟读训练：用同一材料做5分钟跟读"] },
+          2: { duration: "35—45分钟", items: ["词汇：新词+复习", "长难句2句：画主干、标修饰、口头翻译", "口语跟读5分钟"] },
+          3: { duration: "40—50分钟", items: ["词汇：新词+复习", "精听 Conversation B：四步精听", "口语跟读5分钟"] },
+          4: { duration: "35—45分钟", items: ["词汇：新词+复习", "长难句2—3句精析", "口语复述1段精听材料5分钟"] },
+          5: { duration: "40—50分钟", items: ["词汇：新词+复习", "精听 Conversation C：四步精听", "口语跟读5分钟"] },
+          6: { 
+            duration: "1.5—2小时", 
+            itemsOdd: ["精听 Conversation D：四步精听", "回看本周顽固词30分钟", "任选本周一篇 Conversation 脱稿跟读并录音检验"],
+            itemsEven: ["【双周替换】不新增 Conversation D，把本周最差的一篇重新精听一遍", "回看本周顽固词30分钟", "脱稿跟读并录音检验"]
+          },
+          7: { duration: "20—35分钟", items: ["20分钟固定复盘四问", "剩余时间泛听10—15分钟或休息"] }
+        }
+      },
+      sophomore1: {
+        name: "🚀 大二上标准周循环",
+        rule: "<strong>周末检验：</strong>统计阅读+听力错题中“词汇障碍”占比。超过一半→下周词汇加5分钟；低于三成→多花时间分析解题逻辑。",
+        days: {
+          1: { duration: "55—60分钟", items: ["词汇15分钟", "TPO阅读1篇不限时25分钟", "错题标注：定位错/句子没读懂/选项偏差10分钟", "口语跟读5分钟"] },
+          2: { duration: "55—60分钟", items: ["词汇15分钟", "听力 Conversation 精听30分钟", "口语独立题1道：写关键词提纲+45秒录音10分钟"] },
+          3: { duration: "60分钟", items: ["词汇15分钟", "TPO阅读第2篇不限时25分钟", "长难句3句15分钟", "口语跟读5分钟"] },
+          4: { duration: "60分钟", items: ["词汇15分钟", "听力 Lecture 精听35分钟", "口语独立题1道录音10分钟"] },
+          5: { 
+            duration: "55—60分钟", 
+            itemsOdd: ["词汇15分钟", "听力1.2倍速泛听1篇10分钟", "【单周】写独立写作段落1个30分钟"],
+            itemsEven: ["词汇15分钟", "听力1.2倍速泛听1篇10分钟", "【双周】改上周段落+错题回看30分钟"]
+          },
+          6: { duration: "2—2.5小时", items: ["阅读两篇错题精读复盘40分钟", "听力 Lecture 补精听30分钟", "本周2道口语题回听并重录20分钟", "写作段落单周写/双周改30分钟"] },
+          7: { 
+            duration: "20分钟或2小时", 
+            itemsOdd: ["【单周】20分钟复盘", "顽固词巩固20分钟", "英文泛听10分钟"],
+            itemsEven: ["【双周半模】阅读+听力严格计时做题1.5小时", "复盘30分钟", "20分钟固定复盘"]
+          }
+        }
+      },
+      sophomore2: {
+        name: "🚀 大二下首考准备周循环",
+        rule: "<strong>考前4周切换：</strong>周六固定完整模考，周日固定全天复盘；工作日取消新阅读，改为错题回看+口语3题/天+写作重写1篇/两天。",
+        days: {
+          1: { duration: "1—1.5小时", items: ["词汇10分钟", "TPO阅读1篇限时17分钟+错题复盘20分钟", "口语综合题1道20分钟"] },
+          2: { duration: "1—1.5小时", items: ["听力完整 Section（1C+2L）精听40分钟+笔记复盘", "口语综合题1道20分钟"] },
+          3: { duration: "1—1.5小时", items: ["词汇10分钟", "TPO阅读1篇限时+错题20分钟", "综合写作模板/1段30分钟"] },
+          4: { duration: "1—1.5小时", items: ["听力完整 Section 精听+笔记复盘40分钟", "口语独立题2道录音20分钟"] },
+          5: { duration: "1.5小时", items: ["词汇10分钟", "TPO阅读1篇限时+错题20分钟", "综合写作1篇或独立段落30分钟", "错题回看10分钟"] },
+          6: { 
+            duration: "2.5—3.5小时", 
+            itemsOdd: ["【非模考周】TPO阅读3篇限时", "听力1个Section限时", "口语3题模拟"],
+            itemsEven: ["【模考周】完整模考一次，严格计时"]
+          },
+          7: { 
+            duration: "1—3小时", 
+            itemsOdd: ["【非模考周】20分钟复盘", "写作重写1篇40分钟", "口语重录2题20分钟"],
+            itemsEven: ["【模考周】模考复盘2小时", "弱项加练1小时", "下周计划20分钟"]
+          }
+        }
+      },
+      junior_weak: {
+        name: "⚡ 大三弱项攻坚标准周循环",
+        rule: "<strong>弱项微调：</strong>若弱项非口语写作，把“口语3题/写作1篇”替换为你的弱项专项。<br><strong>检验：</strong>口语流利度提升；重写作文少犯原稿同类错误。",
+        days: {
+          1: { duration: "2小时", items: ["词汇10分钟", "口语3题（独立+综合交替）45分钟", "阅读限时20分钟+错题15分钟", "听力泛听10分钟"] },
+          2: { duration: "2—2.5小时", items: ["口语3题45分钟", "综合写作1篇30分钟", "听力1个Section精听30分钟", "错题回看10分钟"] },
+          3: { duration: "2—2.5小时", items: ["口语3题45分钟", "学术讨论写作1篇30分钟", "阅读限时20分钟", "听力20分钟"] },
+          4: { duration: "2—2.5小时", items: ["口语3题45分钟", "写作自查/重写1篇40分钟", "听力1个Section精听30分钟", "错题回看10分钟"] },
+          5: { duration: "2小时", items: ["口语3题45分钟", "写作段落或综合模板30分钟", "阅读限时20分钟", "错题本翻看10分钟"] },
+          6: { duration: "3—3.5小时", items: ["完整模考1套（按真实时间）", "模考后快速标记错题，不深度复盘"] },
+          7: { duration: "3—3.5小时", items: ["模考复盘2小时", "重录本周最卡2道口语题20分钟", "重写1篇写作40分钟", "下周计划20分钟"] }
+        }
+      },
+      junior_exam: {
+        name: "⚡ 大三考前4周双模考冲刺",
+        rule: "<strong>应急微调：</strong>时间不够时周三改为半模（阅读+听力）。<br><strong>考前7天：</strong>停止新题，只翻错题本、口语录音与写作重写稿。",
+        days: {
+          1: { duration: "2小时", items: ["复盘上周六模考错题：阅读20分钟+听力20分钟", "口语3题40分钟", "写作重写1段20分钟", "词汇10分钟"] },
+          2: { duration: "2小时", items: ["口语3题40分钟", "综合写作1篇30分钟", "听力错题回看20分钟", "阅读错题回看20分钟"] },
+          3: { duration: "3—3.5小时", items: ["【完整模考第1套】严格计时实战", "记录原始分与模考状态"] },
+          4: { duration: "2.5—3小时", items: ["复盘周三模考2小时", "口语2题20分钟", "写作自查20分钟"] },
+          5: { duration: "1.5小时", items: ["错题本全科回看40分钟", "口语录音回听+重录2题30分钟", "写作模板/段落20分钟"] },
+          6: { duration: "3—3.5小时", items: ["【完整模考第2套】严格计时实战", "全真适应考场时间"] },
+          7: { duration: "3—3.5小时", items: ["复盘周六模考2小时", "重录最卡2题20分钟", "重写1篇40分钟", "考前心态与规划20分钟"] }
+        }
+      }
+    };
+
+    const DAYS_LABEL = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+    let currentStage = localStorage.getItem("toefl_stage") || "freshman";
+    let currentWeekType = localStorage.getItem("toefl_week_type") || "odd";
+    let todayDayIndex = new Date().getDay() === 0 ? 7 : new Date().getDay();
+    let selectedDay = todayDayIndex;
+
+    function init() {
+      try {
+        document.getElementById("stage-select").value = currentStage;
+        setWeekType(currentWeekType, false);
+        renderWeekSlider();
+        renderDayTasks();
+        updateStreakDisplay();
+        setupNotificationTimer();
+      } catch (err) {
+        console.error("Init error:", err);
+      }
+    }
+
+    function renderWeekSlider() {
+      const slider = document.getElementById("week-slider");
+      slider.innerHTML = "";
+      for (let i = 1; i <= 7; i++) {
+        const btn = document.createElement("button");
+        btn.className = `day-btn ${i === selectedDay ? 'active' : ''} ${i === todayDayIndex ? 'is-today' : ''}`;
+        btn.onclick = () => selectDay(i);
+        btn.innerHTML = `<div style="font-size:11px;color:#888;">Day ${i}</div><div style="font-size:15px;font-weight:800;margin-top:2px;">${DAYS_LABEL[i-1]}</div>`;
+        slider.appendChild(btn);
+      }
+    }
+
+    function selectDay(day) {
+      selectedDay = day;
+      renderWeekSlider();
+      renderDayTasks();
+    }
+
+    function switchStage() {
+      currentStage = document.getElementById("stage-select").value;
+      localStorage.setItem("toefl_stage", currentStage);
+      renderDayTasks();
+    }
+
+    function setWeekType(type, save = true) {
+      currentWeekType = type;
+      if (save) localStorage.setItem("toefl_week_type", type);
+      document.getElementById("pill-odd").classList.toggle("active", type === "odd");
+      document.getElementById("pill-even").classList.toggle("active", type === "even");
+      renderDayTasks();
+    }
+
+    function getItemKey(index) {
+      return `toefl_task_${currentStage}_${currentWeekType}_d${selectedDay}_i${index}`;
+    }
+
+    function renderDayTasks() {
+      const stageData = SCHEDULE_DATA[currentStage];
+      const dayData = stageData.days[selectedDay];
+      document.getElementById("task-day-title").innerText = `${DAYS_LABEL[selectedDay-1]} · ${stageData.name}`;
+      document.getElementById("task-duration").innerText = `⏱️ ${dayData.duration}`;
+      document.getElementById("stage-notes").innerHTML = stageData.rule;
+
+      let items = dayData.items;
+      if (!items) {
+        items = (currentWeekType === 'even' && dayData.itemsEven) ? dayData.itemsEven : dayData.itemsOdd;
+      }
+
+      const listContainer = document.getElementById("tasks-list");
+      listContainer.innerHTML = "";
+      let allChecked = true;
+
+      items.forEach((taskText, idx) => {
+        const isChecked = localStorage.getItem(getItemKey(idx)) === "true";
+        if (!isChecked) allChecked = false;
+        const itemDiv = document.createElement("div");
+        itemDiv.className = `task-item ${isChecked ? 'checked' : ''}`;
+        itemDiv.onclick = () => toggleTask(idx);
+        itemDiv.innerHTML = `<div class="checkbox-box">${isChecked ? '✓' : ''}</div><div class="task-text">${taskText}</div>`;
+        listContainer.appendChild(itemDiv);
+      });
+
+      const reviewBox = document.getElementById("sunday-review-box");
+      if (selectedDay === 7) {
+        reviewBox.style.display = "block";
+        loadReviewNotes();
+      } else {
+        reviewBox.style.display = "none";
+      }
+
+      const finishBtn = document.getElementById("finish-all-btn");
+      finishBtn.innerText = allChecked ? "🎉 今日已全勤！点击重新开启" : "✨ 一键完成今日全部任务";
+    }
+
+    function toggleTask(idx) {
+      const key = getItemKey(idx);
+      const nowChecked = !(localStorage.getItem(key) === "true");
+      localStorage.setItem(key, nowChecked);
+      renderDayTasks();
+      checkAllDoneAndCelebrate();
+    }
+
+    function toggleAllToday() {
+      const stageData = SCHEDULE_DATA[currentStage];
+      const dayData = stageData.days[selectedDay];
+      let items = dayData.items || ((currentWeekType === 'even' && dayData.itemsEven) ? dayData.itemsEven : dayData.itemsOdd);
+      let hasUnfinished = items.some((_, idx) => localStorage.getItem(getItemKey(idx)) !== "true");
+      items.forEach((_, idx) => {
+        localStorage.setItem(getItemKey(idx), hasUnfinished ? "true" : "false");
+      });
+      renderDayTasks();
+      if (hasUnfinished) {
+        triggerConfetti();
+        recordDailyStreak();
+      }
+    }
+
+    function checkAllDoneAndCelebrate() {
+      const stageData = SCHEDULE_DATA[currentStage];
+      const dayData = stageData.days[selectedDay];
+      let items = dayData.items || ((currentWeekType === 'even' && dayData.itemsEven) ? dayData.itemsEven : dayData.itemsOdd);
+      let allDone = items.every((_, idx) => localStorage.getItem(getItemKey(idx)) === "true");
+      if (allDone) {
+        triggerConfetti();
+        recordDailyStreak();
+      }
+    }
+
+    function getTodayString() {
+      const d = new Date();
+      return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    }
+
+    function recordDailyStreak() {
+      const today = getTodayString();
+      const lastCheckDate = localStorage.getItem("toefl_last_streak_date");
+      let streak = parseInt(localStorage.getItem("toefl_streak_count") || "0", 10);
+      if (lastCheckDate === today) return;
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yStr = `${yesterday.getFullYear()}-${yesterday.getMonth()+1}-${yesterday.getDate()}`;
+
+      if (lastCheckDate === yStr) {
+        streak += 1;
+      } else {
+        streak = 1;
+      }
+      localStorage.setItem("toefl_last_streak_date", today);
+      localStorage.setItem("toefl_streak_count", streak);
+      updateStreakDisplay();
+    }
+
+    function updateStreakDisplay() {
+      const streak = localStorage.getItem("toefl_streak_count") || "0";
+      document.getElementById("streak-count").innerText = streak;
+    }
+
+    function saveReviewNotes() {
+      const reviewObj = {
+        q1: document.getElementById("rev-q1").value,
+        q2: document.getElementById("rev-q2").value,
+        q3: document.getElementById("rev-q3").value,
+        q4: document.getElementById("rev-q4").value
+      };
+      localStorage.setItem(`toefl_review_${currentStage}_${currentWeekType}`, JSON.stringify(reviewObj));
+      alert("✅ 周日复盘笔记已保存！");
+    }
+
+    function loadReviewNotes() {
+      const saved = localStorage.getItem(`toefl_review_${currentStage}_${currentWeekType}`);
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          document.getElementById("rev-q1").value = data.q1 || "";
+          document.getElementById("rev-q2").value = data.q2 || "";
+          document.getElementById("rev-q3").value = data.q3 || "";
+          document.getElementById("rev-q4").value = data.q4 || "";
+        } catch(e){}
+      }
+    }
+
+    function requestNotification() {
+      if (!("Notification" in window)) {
+        alert("当前环境不支持系统通知，建议在电脑 Chrome/Edge 或 iPhone Safari 添加至主屏幕后开启。");
+        return;
+      }
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          const reminderTime = document.getElementById("reminder-time").value;
+          localStorage.setItem("toefl_reminder_time", reminderTime);
+          new Notification("🦉 托福猫头鹰：", {
+            body: `已开启每日 ${reminderTime} 桌面打卡提醒！`,
+            icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦉</text></svg>"
+          });
+        } else {
+          alert("通知权限被拒绝，请在浏览器地址栏左侧网站设置中允许通知。");
+        }
+      });
+    }
+
+    function setupNotificationTimer() {
+      setInterval(() => {
+        if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+        const setTime = localStorage.getItem("toefl_reminder_time") || "21:00";
+        const now = new Date();
+        const currentHM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        if (currentHM === setTime && now.getSeconds() < 10) {
+          new Notification("🔥 托福打卡时间到啦！", {
+            body: `今天的托福核心任务完成了吗？赶紧打卡保持连胜吧！`,
+            icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦉</text></svg>"
+          });
+        }
+      }, 30000);
+    }
+
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const pieces = [];
+      const colors = ['#58cc02', '#1cb0f6', '#ffc800', '#ff4b4b'];
+      for (let i = 0; i < 70; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * -canvas.height,
+          w: Math.random() * 10 + 6,
+          h: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: Math.random() * 4 - 2,
+          vy: Math.random() * 5 + 3,
+          rot: Math.random() * 360,
+          dRot: Math.random() * 10 - 5
+        });
+      }
+      let frames = 0;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.rot += p.dRot;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot * Math.PI / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 120) requestAnimationFrame(render);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      render();
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
